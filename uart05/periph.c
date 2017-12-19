@@ -3,8 +3,8 @@
 //-------------------------------------------------------------------------
 
 //Uncomment one of these
-#include "BCM2835.h" /* Original B,A,A+,B+ */
-//#include "BCM2836.h" /* Raspberriy Pi 2 */
+//#include "BCM2835.h" /* Original B,A,A+,B+ */
+#include "BCM2836.h" /* Raspberriy Pi 2 */
 
 extern void PUT32 ( unsigned int, unsigned int );
 extern void PUT16 ( unsigned int, unsigned int );

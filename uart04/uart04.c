@@ -8,35 +8,41 @@ extern void dummy ( unsigned int );
 extern void enable_irq ( void );
 extern void enable_fiq ( void );
 
-#define GPFSEL1 0x20200004
-#define GPSET0  0x2020001C
-#define GPCLR0  0x20200028
-#define GPPUD       0x20200094
-#define GPPUDCLK0   0x20200098
+#define PBASE 0x3F000000
 
-#define AUX_ENABLES     0x20215004
-#define AUX_MU_IO_REG   0x20215040
-#define AUX_MU_IER_REG  0x20215044
-#define AUX_MU_IIR_REG  0x20215048
-#define AUX_MU_LCR_REG  0x2021504C
-#define AUX_MU_MCR_REG  0x20215050
-#define AUX_MU_LSR_REG  0x20215054
-#define AUX_MU_MSR_REG  0x20215058
-#define AUX_MU_SCRATCH  0x2021505C
-#define AUX_MU_CNTL_REG 0x20215060
-#define AUX_MU_STAT_REG 0x20215064
-#define AUX_MU_BAUD_REG 0x20215068
+#define GPFSEL1 (PBASE+0x00200004)
+#define GPSET0  (PBASE+0x0020001C)
+#define GPCLR0  (PBASE+0x00200028)
+#define GPPUD       (PBASE+0x00200094)
+#define GPPUDCLK0   (PBASE+0x00200098)
 
-#define IRQ_BASIC 0x2000B200
-#define IRQ_PEND1 0x2000B204
-#define IRQ_PEND2 0x2000B208
-#define IRQ_FIQ_CONTROL 0x2000B210
-#define IRQ_ENABLE1 0x2000B210
-#define IRQ_ENABLE2 0x2000B214
-#define IRQ_ENABLE_BASIC 0x2000B218
-#define IRQ_DISABLE1 0x2000B21C
-#define IRQ_DISABLE2 0x2000B220
-#define IRQ_DISABLE_BASIC 0x2000B224
+#define AUX_ENABLES     (PBASE+0x00215004)
+//primary: read/write from/to fifos
+//DLAB=1: 7:0 - access to LS 9 bits of baud rate (R/W)
+//DLAB=0: 7:0 data writen is put in the trans fifo (if not full) (W)
+//DLAB=0: 7:0 data taken from the receive fifo (if not empty)
+#define AUX_MU_IO_REG   (PBASE+0x00215040)
+#define AUX_MU_IER_REG  (PBASE+0x00215044)
+#define AUX_MU_IIR_REG  (PBASE+0x00215048)
+#define AUX_MU_LCR_REG  (PBASE+0x0021504C)
+#define AUX_MU_MCR_REG  (PBASE+0x00215050)
+#define AUX_MU_LSR_REG  (PBASE+0x00215054)
+#define AUX_MU_MSR_REG  (PBASE+0x00215058)
+#define AUX_MU_SCRATCH  (PBASE+0x0021505C)
+#define AUX_MU_CNTL_REG (PBASE+0x00215060)
+#define AUX_MU_STAT_REG (PBASE+0x00215064)
+#define AUX_MU_BAUD_REG (PBASE+0x00215068)
+
+#define IRQ_BASIC (PBASE+0x0000B200)
+#define IRQ_PEND1 (PBASE+0x0000B204)
+#define IRQ_PEND2 (PBASE+0x0000B208)
+#define IRQ_FIQ_CONTROL (PBASE+0x0000B210)
+#define IRQ_ENABLE1 (PBASE+0x0000B210)
+#define IRQ_ENABLE2 (PBASE+0x0000B214)
+#define IRQ_ENABLE_BASIC (PBASE+0x0000B218)
+#define IRQ_DISABLE1 (PBASE+0x0000B21C)
+#define IRQ_DISABLE2 (PBASE+0x0000B220)
+#define IRQ_DISABLE_BASIC (PBASE+0x0000B224)
 
 
 //GPIO14  TXD0 and TXD1
@@ -50,12 +56,18 @@ void uart_init ( void )
 {
     unsigned int ra;
 
-    PUT32(AUX_ENABLES,1);
+    PUT32(AUX_ENABLES,1);//if bit 1 is set, the mini-uart is enable
+
+    //primary used to enable interrupts
+    //DLAB is a bit in the control register
+    //if DLAB=1 - bits 7:0 give access to the baud rate (R/W)
+    //if DLAB=0 - if bit 1 is set - the interrupt line is asserted when the recieve fifo holds at least 1 byte (R)
+    //if DLAB=0 - if bit 0 is set - the interrupt line is asserted when the trans fifo  is empty (R)
     PUT32(AUX_MU_IER_REG,0);
-    PUT32(AUX_MU_CNTL_REG,0);
+    PUT32(AUX_MU_CNTL_REG,0);//
     PUT32(AUX_MU_LCR_REG,3);
     PUT32(AUX_MU_MCR_REG,0);
-    PUT32(AUX_MU_IER_REG,0x5); //enable rx interrupts
+    PUT32(AUX_MU_IER_REG,0x5); //enable rx interrupts //5=0101
     PUT32(AUX_MU_IIR_REG,0xC6);
     PUT32(AUX_MU_BAUD_REG,270);
 

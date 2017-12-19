@@ -13,6 +13,7 @@ extern void PUT16 ( unsigned int, unsigned int );
 extern void PUT8 ( unsigned int, unsigned int );
 extern unsigned int GET32 ( unsigned int );
 extern unsigned int GETPC ( void );
+extern unsigned int GETPC2 ( void );
 extern void dummy ( unsigned int );
 extern unsigned int BRANCHTO ( unsigned int );
 
@@ -37,6 +38,8 @@ int notmain ( void )
     uart_init();
     hexstring(0x12345678);
     hexstring(GETPC());
+    hexstring(0xa1b2c3d4);
+    hexstring(GETPC2());
 
     //e12fff1e    bx  lr
     //ee100f10    mrc 15, 0, r0, cr0, cr0, {0}
@@ -84,6 +87,10 @@ int notmain ( void )
         hexstrings(ra);
         hexstring(BRANCHTO(0x4000));
     }
+    uart_send('b');
+    uart_send('y');
+    uart_send('e');
+
     return(0);
 }
 //-------------------------------------------------------------------------

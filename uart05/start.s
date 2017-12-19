@@ -10,7 +10,7 @@ hang: b hang
 
 .globl PUT32
 PUT32:
-    str r1,[r0]
+    str r1,[r0] 	; Store value of R1 into an address equal to r0
     bx lr
 
 .globl GET32
@@ -24,8 +24,14 @@ dummy:
 
 .globl GETPC
 GETPC:
-    mov r0,lr
+    mov r0,lr                   ;@ mov lr to r0
     bx lr
+
+.globl GETPC2
+
+GETPC2:
+	mov r0,#0x8000                   ;@ mov lr to r0
+	bx lr
 
 
 .globl BRANCHTO
